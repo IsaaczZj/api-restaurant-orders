@@ -38,6 +38,39 @@ class ProductController {
       next(error);
     }
   }
+
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = z
+        .string()
+        .transform((value) => Number(value))
+        .refine((value) => !isNaN(value), {
+          error: "O id deve ser um número",
+        })
+        .parse(req.params.id);
+      const bodySchemaUpdate = z.object({
+        name: z
+          .string({ error: "O nome do produto é obrigatório" })
+          .trim()
+          .min(6, "O produto precisa ter no mínimo 6 caracteres")
+          .optional(),
+        price: z
+          .number()
+          .gt(0, "O preço precisa ser maior do que zero")
+          .optional(),
+      });
+      const { name, price } = bodySchemaUpdate.parse(req.body);
+      if (!name && !price) {
+        throw new AppError("Digite algo para atualizar o produto", 400);
+      }
+      await knex<ProductRepository>("products")
+        .update({ name, price, updated_at: knex.fn.now() })
+        .where({id});
+      return res.json({ message: "Produto atualizado com sucesso" });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export { ProductController };
