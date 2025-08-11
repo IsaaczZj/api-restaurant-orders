@@ -6,7 +6,11 @@ import { AppError } from "@/utils/app-error";
 class ProductController {
   async index(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await knex("products").select();
+      const { name } = req.query;
+      const products = await knex<ProductRepository>("products")
+        .select()
+        .whereLike("name", `%${name ?? ""}%`)
+        .orderBy("name");
       if (products.length === 0) {
         throw new AppError("Nenhum produto cadastrado", 404);
       }
