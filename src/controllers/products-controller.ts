@@ -41,12 +41,8 @@ class ProductController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = z
-        .string()
-        .transform((value) => Number(value))
-        .refine((value) => !isNaN(value), {
-          error: "O id deve ser um número",
-        })
+      const id = z.coerce
+        .number({ error: "O id deve ser um numero" })
         .parse(req.params.id);
       const bodySchemaUpdate = z.object({
         name: z
@@ -63,10 +59,32 @@ class ProductController {
       if (!name && !price) {
         throw new AppError("Digite algo para atualizar o produto", 400);
       }
-      await knex<ProductRepository>("products")
+      const updatedProductLine = await knex<ProductRepository>("products")
         .update({ name, price, updated_at: knex.fn.now() })
-        .where({id});
+        .where({ id });
+
+      if (updatedProductLine === 0) {
+        return res.status(404).json({ message: "Produto não encontrado" });
+      }
       return res.json({ message: "Produto atualizado com sucesso" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async remove(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = z.coerce
+        .number("O id deve ser um numero")
+        .parse(req.params.id);
+
+      const deletedProductLine = await knex<ProductRepository>("products")
+        .del()
+        .where({ id });
+      if (deletedProductLine === 0) {
+        throw new AppError("Não existe esse produto", 404);
+      }
+      res.status(204).json();
     } catch (error) {
       next(error);
     }
