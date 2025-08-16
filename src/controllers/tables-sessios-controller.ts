@@ -28,7 +28,7 @@ class TablesSessionsController {
         table_id,
         opened_at: knex.fn.now(),
       });
-      res.status(201).json({
+      return res.status(201).json({
         message: "Sessão criada com sucesso",
       });
     } catch (error) {
@@ -40,8 +40,31 @@ class TablesSessionsController {
     try {
       const sessions = await knex<TablesSessionsRepository>(
         "tables_sessions"
-      ).orderBy("opened_at",'asc');
+      ).orderBy("opened_at", "asc");
       return res.status(200).json(sessions);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = z.coerce
+        .number("O ID precisa ser um número")
+        .parse(req.params.id);
+
+      const session = await knex<TablesSessionsRepository>("tables_sessions")
+        .where({ id })
+        .whereNull("closed_at")
+        .first();
+      if (!session) {
+        throw new AppError("Essa sessão não existe ou já foi fechada", 404);
+      }
+      await knex<TablesSessionsRepository>("tables_sessions")
+        .where({ id })
+        .update({ closed_at: knex.fn.now() });
+
+      return res.status(200).json({ message: "Mesa encerrada com sucesso" });
     } catch (error) {
       next(error);
     }
