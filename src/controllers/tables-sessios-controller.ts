@@ -4,6 +4,16 @@ import { Request, Response, NextFunction } from "express";
 import z from "zod";
 
 class TablesSessionsController {
+  async index(req: Request, res: Response, next: NextFunction) {
+    try {
+      const sessions = await knex<TablesSessionsRepository>(
+        "tables_sessions"
+      ).orderBy("opened_at", "desc");
+      return res.status(200).json(sessions);
+    } catch (error) {
+      next(error);
+    }
+  }
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const bodySchema = z.object({
@@ -31,17 +41,6 @@ class TablesSessionsController {
       return res.status(201).json({
         message: "Sessão criada com sucesso",
       });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async index(req: Request, res: Response, next: NextFunction) {
-    try {
-      const sessions = await knex<TablesSessionsRepository>(
-        "tables_sessions"
-      ).orderBy("opened_at", "asc");
-      return res.status(200).json(sessions);
     } catch (error) {
       next(error);
     }
