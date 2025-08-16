@@ -10,16 +10,18 @@ class TablesSessionsController {
         table_id: z.coerce.number("O ID da mesa deve ser numérico"),
       });
       const { table_id } = bodySchema.parse(req.body);
-      const table = await knex("tables").where({ id: table_id }).first();
+      const table = await knex<TablesSessionsRepository>("tables")
+        .where({ id: table_id })
+        .first();
       if (!table) {
         throw new AppError("Mesa não encontrada", 404);
       }
 
-      const openSession = await knex("tables_sessions")
+      const session = await knex<TablesSessionsRepository>("tables_sessions")
         .where({ table_id })
-        .whereNull("closed_at")
+        .orderBy("closed_at", "desc")
         .first();
-      if (openSession) {
+      if (session && !session.closed_at) {
         throw new AppError("Mesa já possui uma sessao aberta", 400);
       }
       await knex<TablesSessionsRepository>("tables_sessions").insert({
@@ -29,6 +31,17 @@ class TablesSessionsController {
       res.status(201).json({
         message: "Sessão criada com sucesso",
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async index(req: Request, res: Response, next: NextFunction) {
+    try {
+      const sessions = await knex<TablesSessionsRepository>(
+        "tables_sessions"
+      ).orderBy("opened_at",'asc');
+      return res.status(200).json(sessions);
     } catch (error) {
       next(error);
     }
