@@ -31,7 +31,7 @@ class TablesSessionsController {
         "tables_sessions"
       )
         .where({ table_id })
-        .whereNull("closed_at") // ✅ Só sessões abertas
+        .whereNull("closed_at")
         .first();
       if (openSession) {
         throw new AppError("Mesa já possui uma sessao aberta", 400);

@@ -10,7 +10,7 @@ class ProductController {
       const products = await knex<ProductRepository>("products")
         .select()
         .whereLike("name", `%${name ?? ""}%`)
-        .orderBy("name");
+        .orderBy("name")
       if (products.length === 0) {
         throw new AppError("Nenhum produto cadastrado", 404);
       }
