@@ -49,8 +49,30 @@ class OrdersController {
 
   async index(req: Request, res: Response, next: NextFunction) {
     try {
-      const orders = await knex<OrderRespository[]>("orders");
-      res.status(200).json(orders)
+      const { table_session_id } = req.params;
+
+      const order = await knex("orders")
+        .select(
+          "orders.id",
+          "orders.table_session_id",
+          "orders.product_id",
+          "products.name",
+          "orders.price",
+          "orders.quantity",
+          knex.raw("(orders.price * orders.quantity) as total"),
+          "orders.created_at",
+          "orders.updated_at"
+        )
+        .join("products", "products.id", "orders.product_id")
+        .where({
+          table_session_id,
+        })
+        .orderBy("orders.created_at", "desc");
+
+      if (order.length === 0) {
+        throw new AppError("Mesa não encontrada ou sessão já fechada", 404);
+      }
+      return res.status(200).json(order);
     } catch (error) {
       next(error);
     }
