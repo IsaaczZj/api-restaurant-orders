@@ -154,6 +154,35 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.base.BASE_URL }}/{{ _[''].RESOURCE }}/create-table"
+        name: create
+        meta:
+          id: req_e9b2952a245d414593b0eaf9e4cb4a6e
+          created: 1755881447535
+          modified: 1755881591712
+          isPrivate: false
+          description: ""
+          sortKey: -1755881447535
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"table_number": 10
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
     environment:
       "":
         RESOURCE: tables
