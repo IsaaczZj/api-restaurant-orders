@@ -27,11 +27,13 @@ class TablesSessionsController {
         throw new AppError("Mesa não encontrada", 404);
       }
 
-      const session = await knex<TablesSessionsRepository>("tables_sessions")
+      const openSession = await knex<TablesSessionsRepository>(
+        "tables_sessions"
+      )
         .where({ table_id })
-        .orderBy("closed_at", "desc")
+        .whereNull("closed_at") // ✅ Só sessões abertas
         .first();
-      if (session && !session.closed_at) {
+      if (openSession) {
         throw new AppError("Mesa já possui uma sessao aberta", 400);
       }
       await knex<TablesSessionsRepository>("tables_sessions").insert({

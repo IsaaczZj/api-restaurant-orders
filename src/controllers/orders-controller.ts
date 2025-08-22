@@ -34,7 +34,7 @@ class OrdersController {
         throw new AppError("Produto não encontrado", 404);
       }
 
-      const order = await knex<OrderRespository>("orders").insert({
+      await knex<OrderRespository>("orders").insert({
         product_id,
         table_session_id,
         quantity,
@@ -73,6 +73,24 @@ class OrdersController {
         throw new AppError("Mesa não encontrada ou sessão já fechada", 404);
       }
       return res.status(200).json(order);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async showResume(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { table_session_id } = req.params;
+
+      const orders = await knex("orders")
+        .select(knex.raw("coalesce(sum(orders.price * orders.quantity), 0) as total_check"))
+
+        .where({
+          table_session_id,
+        })
+        .first();
+
+      return res.status(200).json(orders);
     } catch (error) {
       next(error);
     }
