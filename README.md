@@ -203,19 +203,19 @@ orders (id, table_session_id, product_id, quantity, price, created_at, updated_a
 
 ```bash
 # Criar nova migração
-npx knex migrate:make nome_da_migracao
+npm run knex migrate:make nome_da_migracao
 
 # Executar migrações
-npx knex migrate:latest
+npm run knex migrate:latest
 
 # Reverter última migração
-npx knex migrate:rollback
+npm run knex migrate:rollback
 
 # Executar seeds
-npx knex seed:run
+npm run knex seed:run
 
 # Verificar status das migrações
-npx knex migrate:status
+npm run knex migrate:status
 ```
 
 ## 🔧 Desenvolvimento
