@@ -27,12 +27,30 @@ class OrdersController {
         throw new AppError("Sessão já encerrada", 404);
       }
 
-      const product = await knex<ProductRepository>("products").where({ id: product_id }).first();
+      const product = await knex<ProductRepository>("products")
+        .where({ id: product_id })
+        .first();
       if (!product) {
         throw new AppError("Produto não encontrado", 404);
       }
 
-      return res.status(201).json(product);
+      const order = await knex<OrderRespository>("orders").insert({
+        product_id,
+        table_session_id,
+        quantity,
+        price: product.price,
+      });
+
+      return res.status(201).json({ message: "Pedido criado com sucesso" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async index(req: Request, res: Response, next: NextFunction) {
+    try {
+      const orders = await knex<OrderRespository[]>("orders");
+      res.status(200).json(orders)
     } catch (error) {
       next(error);
     }
